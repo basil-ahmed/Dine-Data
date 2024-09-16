@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import random
+from requests.exceptions import RequestException
 
 # URL of the TripAdvisor page
 url = 'https://www.tripadvisor.com/Restaurants-g32655-Los_Angeles_California.html'
@@ -20,48 +21,59 @@ headers = {
     'Referer': 'https://www.google.com/'
 }
 
-# Send a request to fetch the HTML content of the page
-response = requests.get(url, headers=headers)
+try:
+    # Send a request to fetch the HTML content of the page
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()  # Raises HTTPError for bad responses (4xx, 5xx)
 
-# Check if the request was successful
-if response.status_code != 200:
-    print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+except RequestException as e:
+    print(f"Error fetching the webpage: {e}")
 else:
     # Parse the HTML
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # List to store extracted restaurant data
-restaurants = []
+    restaurants = []
 
-# Find all restaurants based on the updated class
-for restaurant_item in soup.find_all('div', class_='vIjFZ Gi o VOEhq'):
-    restaurant = {}
+    # Find all restaurants based on the updated class
+    for restaurant_item in soup.find_all('div', class_='vIjFZ Gi o VOEhq'):
+        restaurant = {}
 
-    # Extract restaurant name
-    name_tag = restaurant_item.find('a', class_='BMQDV _F Gv wSSLS SwZTJ FGwzt ukgoS')
-    if name_tag:
-        restaurant['name'] = name_tag.text.strip()
+        # Extract restaurant name
+        name_tag = restaurant_item.find('a', class_='BMQDV _F Gv wSSLS SwZTJ FGwzt ukgoS')
+        if name_tag:
+            restaurant['name'] = name_tag.text.strip()
+        else:
+            restaurant['name'] = "N/A"  # Default value if the name is not found
 
-    # Extract reviews
-    review_tag = restaurant_item.find('span', class_='IiChw')
-    if review_tag:
-        restaurant['reviews'] = review_tag.text.strip()
+        # Extract reviews
+        review_tag = restaurant_item.find('span', class_='IiChw')
+        if review_tag:
+            restaurant['reviews'] = review_tag.text.strip()
+        else:
+            restaurant['reviews'] = "N/A"  # Default value if reviews are not found
 
-    # Extract price level
-    price_tag = restaurant_item.find('span', text=lambda x: '$' in x if x else False)
-    if price_tag:
-        restaurant['price_level'] = price_tag.text.strip()
+        # Extract price level
+        price_tag = restaurant_item.find('span', text=lambda x: '$' in x if x else False)
+        if price_tag:
+            restaurant['price_level'] = price_tag.text.strip()
+        else:
+            restaurant['price_level'] = "N/A"  # Default value if price level is not found
 
-    # Add the restaurant to the list
-    restaurants.append(restaurant)
+        # Add the restaurant to the list
+        restaurants.append(restaurant)
 
-# Specify the CSV file name
-csv_file = "TripAdvisor_LA.csv"
+    # Specify the CSV file name
+    csv_file = "TripAdvisor_LA_new.csv"
 
-# Write the restaurant data into a CSV file
-with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file, fieldnames=["name", "reviews", "price_level"])
-    writer.writeheader()
-    writer.writerows(restaurants)
+    try:
+        # Write the restaurant data into a CSV file
+        with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=["name", "reviews", "price_level"])
+            writer.writeheader()
+            writer.writerows(restaurants)
 
-print(f"Restaurant data successfully written to {csv_file}")
+        print(f"Restaurant data successfully written to {csv_file}")
+
+    except IOError as e:
+        print(f"Error writing to CSV file: {e}")
