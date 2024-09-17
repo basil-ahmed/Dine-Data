@@ -29,7 +29,6 @@ try:
 except RequestException as e:
     print(f"Error fetching the webpage: {e}")
 else:
-    # Parse the HTML
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # List to store extracted restaurant data
@@ -44,26 +43,24 @@ else:
         if name_tag:
             restaurant['name'] = name_tag.text.strip()
         else:
-            restaurant['name'] = "N/A"  # Default value if the name is not found
+            restaurant['name'] = "N/A"
 
         # Extract reviews
         review_tag = restaurant_item.find('span', class_='IiChw')
         if review_tag:
             restaurant['reviews'] = review_tag.text.strip()
         else:
-            restaurant['reviews'] = "N/A"  # Default value if reviews are not found
+            restaurant['reviews'] = "N/A"
 
         # Extract price level
         price_tag = restaurant_item.find('span', text=lambda x: '$' in x if x else False)
         if price_tag:
             restaurant['price_level'] = price_tag.text.strip()
         else:
-            restaurant['price_level'] = "N/A"  # Default value if price level is not found
+            restaurant['price_level'] = "N/A"
 
-        # Add the restaurant to the list
         restaurants.append(restaurant)
 
-    # Specify the CSV file name
     csv_file = "TripAdvisor_LA_new.csv"
 
     try:
