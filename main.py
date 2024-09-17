@@ -7,18 +7,11 @@ from requests.exceptions import RequestException
 # URL of the TripAdvisor page
 url = 'https://www.tripadvisor.com/Restaurants-g32655-Los_Angeles_California.html'
 
-# List of user agents to rotate
-user_agents = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15',
-]
-
 # Headers to make the request look more like a browser request
 headers = {
-    'User-Agent': random.choice(user_agents),
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0',
     'Accept-Language': 'en-US,en;q=0.9',
-    'Referer': 'https://www.google.com/'
+    'Referer': 'https://www.tripadvisor.com/'
 }
 
 try:
